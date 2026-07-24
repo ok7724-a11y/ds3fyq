@@ -1,3 +1,23 @@
+## 무엇을
+
+저장소 루트에 `CLAUDE.md`를 추가했습니다. 코드 변경은 없고 문서 1개만 추가됩니다.
+
+## 왜
+
+빌드 도구가 없는 3파일 정적 사이트라 HTML·CSS·JS가 프레임워크 대신 암묵적 계약으로
+묶여 있습니다. 한 파일만 고치면 조용히 깨지는 지점들이 있어, `test_site.py`가 검사하는
+그 계약들을 문서로 정리했습니다.
+
+- id 계약 — `script.js`의 `$("#id")` 참조와 HTML id
+- theme-color 삼중 동기화 — meta 태그 · `syncThemeColor()` · CSS `--bg`
+- 네비게이션 링크는 반드시 `#앵커` (스크롤 스파이가 역참조함)
+- README의 "섹션 N개" 문구와 실제 `<section>` 개수
+
+## 리뷰어 참고
+
+- `python3 -m unittest test_site` 7개 모두 통과 확인했습니다.
+- `CLAUDE.md`는 배포 대상이 아닙니다. 배포는 `index.html`·`styles.css`·`script.js` 세 개뿐입니다.
+
 # 폴리텍전준옥 개인 홈페이지
 
 Notion 사이트(`https://fuschia-station-2ad.notion.site`)의 내용을 기반으로 만든
