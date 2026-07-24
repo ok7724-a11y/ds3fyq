@@ -54,7 +54,7 @@ Site settings → Change site name 에서 주소를 `poly-jeonjunok.netlify.app`
 **B-2. 터미널에서 (권장 — 이후 수정이 편함)**
 
 ```bash
-cd "/Users/jeonjun-ok/Movies/Claude Code"
+cd <홈페이지 폴더>
 git init -b main
 git add .
 git commit -m "폴리텍전준옥 홈페이지"
