@@ -7,7 +7,7 @@ Notion 사이트(`https://fuschia-station-2ad.notion.site`)의 내용을 기반�
 
 | 파일 | 설명 |
 |---|---|
-| `index.html` | 전체 페이지 구조 (섹션 8개) |
+| `index.html` | 전체 페이지 구조 (섹션 7개) |
 | `styles.css` | 디자인 토큰 · 다크/라이트 테마 · 반응형 |
 | `script.js` | 테마 전환, 모바일 메뉴, 스크롤 애니메이션, 이메일 복사 |
 
