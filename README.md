@@ -12,6 +12,8 @@
 | `index.html` | 전체 페이지 구조 (섹션 7개) |
 | `styles.css` | 디자인 토큰 · 다크/라이트 테마 · 반응형 |
 | `script.js` | 테마 전환, 모바일 메뉴, 스크롤 애니메이션, 이메일 복사 |
+| `icon.png` | 파비콘 · 소개 섹션 프로필 사진 (512×512) |
+| `simulator-sample.html` | 전기기능사 공개문제 1번 샘플 시뮬레이터 (단독 실행, 의존성 없음) |
 
 ## 로컬에서 보기
 
@@ -25,8 +27,9 @@ python3 -m http.server 4321
 
 ## 배포
 
-빌드 과정이 없는 정적 파일이라, **`index.html` · `styles.css` · `script.js` 세 개만**
-올리면 어디서든 동작합니다. (`README.md` 와 `.claude/` 는 올릴 필요 없습니다.)
+빌드 과정이 없는 정적 파일이라, **`index.html` · `styles.css` · `script.js` · `icon.png` ·
+`simulator-sample.html` 다섯 개만** 올리면 어디서든 동작합니다.
+(`README.md` 와 `.claude/` 는 올릴 필요 없습니다.)
 
 모든 경로가 상대경로라 `example.com/` 이든 `example.com/site/` 든 그대로 동작합니다.
 
@@ -48,7 +51,7 @@ Site settings → Change site name 에서 주소를 `poly-jeonjunok.netlify.app`
 **B-1. 웹에서 업로드 (git 명령 없이)**
 
 1. GitHub에서 새 저장소 생성 (Public)
-2. "uploading an existing file" 클릭 → 세 파일 드래그앤드롭 → Commit
+2. "uploading an existing file" 클릭 → 위 다섯 파일 드래그앤드롭 → Commit
 3. Settings → Pages → Source를 `Deploy from a branch`, 브랜치 `main` / 폴더 `/ (root)` 로 지정
 4. 1~2분 뒤 `아이디.github.io/저장소이름/` 에서 공개
 

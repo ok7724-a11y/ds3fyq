@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>전기기능사 공개문제 1번 시뮬레이터</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#e9edf2;color:#1f2328;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif}
+  header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 18px;background:#1d2733;color:#fff}
+  header h1{margin:0;font-size:18px}
+  header .sub{font-size:12.5px;opacity:.75}
+  .ttl{display:flex;align-items:center;gap:10px 12px;flex-wrap:wrap}
+  .brand{font-size:14.5px;font-weight:700;color:#ffd43b;letter-spacing:-.2px}
+  .yt{display:inline-flex;align-items:center;gap:6px;padding:4px 11px 4px 8px;border-radius:7px;background:#ff0000;color:#fff;
+    font-size:12.5px;font-weight:700;text-decoration:none;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+  .yt:hover{background:#cc0000}
+  .yt svg{width:20px;height:14px;flex:none}
+  header .sp{flex:1}
+  .btn{border:0;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:600;cursor:pointer;background:#33475b;color:#fff}
+  .btn:hover{background:#41596f}
+  .btn.on{background:#2f9e44}
+  .wrap{display:flex;gap:12px;padding:12px;align-items:flex-start}
+  .board{flex:1;min-width:0;background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.12);padding:6px}
+  aside{width:320px;flex:none;display:flex;flex-direction:column;gap:12px}
+  .card{background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.12);padding:12px 14px}
+  .card h3{margin:0 0 10px;font-size:14px;color:#33475b}
+  .stat{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;font-size:13px}
+  .stat div{display:flex;align-items:center;gap:7px}
+  .led{width:11px;height:11px;border-radius:50%;background:#cfd4da;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+  .led.on{background:#40c057;box-shadow:0 0 6px #40c057}
+  .led.warn{background:#fa5252;box-shadow:0 0 6px #fa5252}
+  .led.amber{background:#fab005;box-shadow:0 0 6px #fab005}
+  .ctl{display:flex;align-items:center;gap:8px;font-size:13px;margin:8px 0}
+  .ctl label{width:92px;flex:none}
+  .ctl input[type=range]{flex:1}
+  .ctl output{width:52px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+  select{font-size:13px;padding:3px 6px;border-radius:6px}
+  ol{margin:0;padding-left:18px;font-size:12.5px;line-height:1.6;color:#3b4652}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:#555;margin-top:8px}
+  .legend span::before{content:"";display:inline-block;width:18px;height:4px;border-radius:2px;margin-right:5px;vertical-align:middle;background:var(--c)}
+  svg{display:block;width:100%;height:auto;user-select:none;-webkit-user-select:none;touch-action:none}
+  .wire{fill:none;stroke:#c9ced4;stroke-width:3.2;stroke-linejoin:round;stroke-linecap:round;transition:stroke .15s}
+  .vL1{stroke:#8b4513;stroke-width:5}.vL2{stroke:#111;stroke-width:5}.vL3{stroke:#7a7f85;stroke-width:5}
+  svg.novolt .wire{stroke:#2b2b2b;stroke-width:3.2}
+  .flow{fill:none;stroke:#ffe600;stroke-width:5;stroke-linecap:round;stroke-dasharray:3 15;animation:flow .55s linear infinite;pointer-events:none}
+  svg.noflow .flow{visibility:hidden}
+  @keyframes flow{to{stroke-dashoffset:-18}}
+  .blade{stroke:#1a1a1a;stroke-width:4;fill:none;stroke-linecap:round}
+  .bar,.mv{transition:transform .07s ease-out}
+  .term{fill:#fff;stroke:#1a1a1a;stroke-width:2.6}
+  .hit{fill:transparent;cursor:pointer}
+  .hit:hover{fill:rgba(28,126,214,.07);stroke:#1c7ed6;stroke-width:2;stroke-dasharray:7 5}
+    #pop{position:fixed;z-index:10;background:#fff;border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.25);padding:12px 14px;width:270px;font-size:13px}
+  #pop .pt{font-weight:700;margin-bottom:6px}
+  #pop .row{display:flex;gap:8px;align-items:center}
+  #pop input[type=range]{flex:1}
+  #pop .act{text-align:right;margin-top:8px}
+  @media (max-width:1150px){.wrap{flex-direction:column;align-items:stretch}aside{width:100%}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="ttl"><h1>전기기능사 공개문제 1번 — 동작 시뮬레이터</h1><span class="brand">전기기능사 전문채널 : 폴리텍전준옥</span><a class="yt" href="https://www.youtube.com/@ok7724" target="_blank" rel="noopener" title="유튜브 채널 바로가기 (새 창)"><svg viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" rx="3.5" fill="#fff"/><path d="M8 3.8 13.4 7 8 10.2Z" fill="#ff0000"/></svg>YouTube 바로가기</a></div>
+    <div class="sub">도면의 심벌(MCCB · SS · PB₀ · PB₁ · EOCR · FLS · E₁E₂E₃ · T · FR)을 마우스로 클릭/누르면 동작합니다.</div>
+  </div>
+  <div class="sp"></div>
+  <button class="btn on" id="bSound">🔊 소리 켜짐</button>
+  <button class="btn" id="bReset">⟲ 초기화</button>
+</header>
+
+<div class="wrap">
+  <div class="board">
+    <svg id="sim" viewBox="0 0 2000 1310">
+      <defs>
+        <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="7" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <clipPath id="tankClip"><rect x="992" y="197" width="176" height="246"/></clipPath>
+      </defs>
+      <rect width="2000" height="1310" fill="#fff"/>
+      <g id="gWires"></g><g id="gFlows"></g><g id="gParts"></g><g id="gLabels"></g><g id="gHits"></g>
+    </svg>
+  </div>
+
+  <aside>
+    <div class="card">
+      <h3>동작 상태</h3>
+      <div class="stat" id="stat"></div>
+    </div>
+    <div class="card">
+      <h3>설정</h3>
+      <div class="ctl"><label>타이머 T</label><input type="range" id="tset" min="1" max="30" step="0.5" value="5"><output id="tsetO">5.0s</output></div>
+      <div class="ctl"><label>플리커 FR 주기</label><input type="range" id="frset" min="0.4" max="3" step="0.1" value="1"><output id="frsetO">1.0s</output></div>
+      <div class="ctl"><label>수위</label><input type="range" id="lvl" min="0" max="100" step="1" value="50"><output id="lvlO">50%</output></div>
+      <div class="ctl"><label>FLS 제어 방식</label>
+        <select id="mode"><option value="supply">급수 (E2 이하 → 운전)</option><option value="drain">배수 (E1 도달 → 운전)</option></select></div>
+      <div class="ctl"><label>자연 유출/유입</label><input type="checkbox" id="valve" checked><span id="valveT">밸브 열림</span></div>
+      <div class="ctl"><label>음량</label><input type="range" id="vol" min="0" max="1" step="0.05" value="0.7"><output id="volO">70%</output></div>
+      <div class="ctl"><label>표시</label>
+        <label style="width:auto"><input type="checkbox" id="showFlow" checked> 전류 흐름</label>
+        <label style="width:auto"><input type="checkbox" id="showVolt" checked> 전압</label></div>
+      <div class="legend"><span style="--c:#8b4513">L1 (갈색)</span><span style="--c:#111">L2 (흑색)</span><span style="--c:#7a7f85">L3 (회색)</span><span style="--c:#c9ced4">무전압</span><span style="--c:#ffe600">전류 흐름</span></div>
+    </div>
+    <div class="card">
+      <h3>동작 순서</h3>
+      <ol>
+        <li><b>MCCB</b> 클릭 → 전원 투입 (EOCR 전원 공급)</li>
+        <li><b>SS 수동(M)</b>: <b>PB₁</b> 누름 → MC₁ 여자(M1 운전, RL 점등), T 여자 → 설정시간 후 MC₂ 여자(M2 운전, GL 점등). <b>PB₀</b> → 정지</li>
+        <li><b>SS 자동(A)</b>: FLS 전원 공급. 수위 E2 이하 → FLS(4-3) 닫힘 → X 여자 → MC₁ 여자(M1 펌프). 수위 E1 도달 → 정지. <b>E₁·E₂·E₃(TB₄)</b> 클릭으로도 수위 저/고 전환</li>
+        <li><b>EOCR</b> 클릭 → 과부하 트립: 전 회로 차단, FR 여자 → YL·BZ 교대 동작. 다시 클릭 → 리셋</li>
+        <li><b>T 코일·FR 코일</b> 클릭 → 시간 설정, <b>FLS · E₁·E₂·E₃</b> 클릭 → 수위 전환, <b>수조</b> 드래그 → 수위 조절</li>
+      </ol>
+    </div>
+  </aside>
+</div>
+
+<div id="pop" hidden>
+  <div class="pt" id="popT"></div>
+  <div class="row"><input type="range" id="popR"><output id="popO" style="width:52px;text-align:right;font-weight:700"></output></div>
+  <div class="act"><button class="btn" id="popClose">확인</button></div>
+</div>
+
+<script>
+"use strict";
+const NS='http://www.w3.org/2000/svg';
+const svg=document.getElementById('sim');
+const G={w:gid('gWires'),f:gid('gFlows'),p:gid('gParts'),l:gid('gLabels'),h:gid('gHits')};
+function gid(i){return document.getElementById(i)}
+function el(tag,a,parent){const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);if(parent)parent.appendChild(e);return e}
+const SERIF='"Times New Roman","Nanum Myeongjo","AppleMyungjo","Batang",serif';
+const SANS='Arial,"Apple SD Gothic Neo","Malgun Gothic",sans-serif';
+const C={red:'#e8141c',blue:'#1450ff',pur:'#a23cf0',teal:'#0e9a9a',olive:'#9a9a00',blk:'#111'};
+
+/* 텍스트 (X_1 → 아래첨자) */
+function txt(x,y,s,o={}){
+  const size=o.size||32;
+  const t=el('text',{x,y,'font-size':size,fill:o.color||'#1a1a1a','text-anchor':o.anchor||'start',
+    'font-family':o.font||SERIF,'font-weight':o.weight||'normal','pointer-events':'none'},o.parent||G.l);
+  let down=false;
+  for(const p of s.split(/(_\w)/)){
+    if(!p)continue;
+    if(p[0]==='_'){const ts=el('tspan',{dy:8,'font-size':size*0.66},t);ts.textContent=p.slice(1);down=true}
+    else{const ts=el('tspan',down?{dy:-8}:{},t);ts.textContent=p;down=false}
+  }
+  return t;
+}
+function num(x,y,s,color){return txt(x,y,s,{size:36,color,font:SANS,weight:'bold'})}
+
+/* ───────────── 노드 ───────────── */
+const P={};
+function n(name,x,y){P[name]={x,y}}
+[['S1',130,72],['S2',172,72],['S3',214,72],
+ ['CB1t',130,162],['CB1b',130,222],['CB2t',172,162],['CB2b',172,222],['CB3t',214,162],['CB3b',214,222],
+ ['JF1',130,283],['JF3',214,343],
+ ['EO1',130,413],['EO2',172,413],['EO3',214,413],['EO7',130,467],['EO8',172,467],['EO9',214,467],
+ ['J2a',214,590],['J2b',172,648],['J2c',130,705],
+ ['A1t',130,820],['A1b',130,880],['A2t',172,820],['A2b',172,880],['A3t',214,820],['A3b',214,880],
+ ['B1t',436,820],['B1b',436,880],['B2t',478,820],['B2b',478,880],['B3t',520,820],['B3b',520,880],
+ ['U1',130,1064],['V1',172,1064],['W1',214,1064],['U2',436,1064],['V2',478,1064],['W2',520,1064],
+ ['M1u',150,1117],['M1v',172,1110],['M1w',194,1117],['M1n',172,1150],
+ ['M2u',456,1117],['M2v',478,1110],['M2w',500,1117],['M2n',478,1150],
+ ['F1a',413,283],['F1b',460,283],['F3a',413,343],['F3b',460,343],
+ ['CTL',683,116],['EN1',767,116],['EN2',835,116],
+ ['T1299',1299,116],['T1410',1410,116],['T1592',1592,116],['T1785',1785,116],
+ ['C533',683,533],['EOc_t',683,1030],['EOc_b',683,1106],
+ ['EP_t',783,622],['EP_b',783,690],['N783',783,785],['FRc_t',783,1030],['FRc_b',783,1106],
+ ['N890',890,785],['FRa_t',890,878],['FRa_b',890,940],['YL_t',890,1030],['YL_b',890,1106],
+ ['FRb_t',1001,878],['FRb_b',1001,940],['BZ_t',1001,1032],['BZ_b',1001,1104],
+ ['SSA_t',1299,208],['SSA_b',1299,277],['NA',1299,533],['FLc_t',1101,1030],['FLc_b',1101,1106],
+ ['FL_t',1299,626],['FL_b',1299,694],['Xc_t',1299,1030],['Xc_b',1299,1106],
+ ['SSM_t',1410,208],['SSM_b',1410,277],['PB0_t',1410,375],['PB0_b',1410,442],['PBC',1410,533],
+ ['PB1_t',1410,626],['PB1_b',1410,694],['N1410',1410,785],
+ ['T13_t',1519,626],['T13_b',1519,694],['N1519',1519,785],
+ ['X14_t',1410,878],['X14_b',1410,940],['Tc_t',1410,1030],['Tc_b',1410,1106],
+ ['X86_t',1592,208],['X86_b',1592,277],['N1592',1592,785],['MC1c_t',1592,1030],['MC1c_b',1592,1106],
+ ['T86_t',1690,878],['T86_b',1690,940],['MC2c_t',1690,1030],['MC2c_b',1690,1106],
+ ['MC1a_t',1785,208],['MC1a_b',1785,277],['RL_t',1785,1030],['RL_b',1785,1106],
+ ['MC2a_t',1888,208],['MC2a_b',1888,277],['GL_t',1888,1030],['GL_b',1888,1106]
+].forEach(a=>n(...a));
+for(const x of [683,783,890,1001,1101,1299,1410,1592,1690,1785,1888]) n('R'+x,x,1193);
+
+/* ───────────── 엣지 (배선 / 접점 / 부하) ───────────── */
+const E=[];
+const pt=(x,y)=>({x,y});
+function wire(a,b,via=[]){E.push({type:'wire',a,b,pts:[P[a],...via.map(v=>pt(...v)),P[b]]})}
+function sw(id,a,b){E.push({type:'sw',id,a,b,pts:[P[a],P[b]]})}
+function load(id,a,b){E.push({type:'load',id,a,b})}
+function motor(id,t,nn){const parts=t.map(x=>{E.push({type:'mpart',a:x,b:nn});return E.length-1});E.push({type:'motor',id,t,parts})}
+
+// 주회로
+wire('S1','CB1t');wire('S2','CB2t');wire('S3','CB3t');
+sw('CB1','CB1t','CB1b');sw('CB2','CB2t','CB2b');sw('CB3','CB3t','CB3b');
+wire('CB1b','JF1');wire('JF1','EO1');wire('CB2b','EO2');wire('CB3b','JF3');wire('JF3','EO3');
+wire('EO1','EO7');wire('EO2','EO8');wire('EO3','EO9');
+wire('EO7','J2c');wire('J2c','A1t');wire('EO8','J2b');wire('J2b','A2t');wire('EO9','J2a');wire('J2a','A3t');
+wire('J2c','B1t',[[436,705]]);wire('J2b','B2t',[[478,648]]);wire('J2a','B3t',[[520,590]]);
+sw('MC1p1','A1t','A1b');sw('MC1p2','A2t','A2b');sw('MC1p3','A3t','A3b');
+sw('MC2p1','B1t','B1b');sw('MC2p2','B2t','B2b');sw('MC2p3','B3t','B3b');
+wire('A1b','U1');wire('A2b','V1');wire('A3b','W1');wire('B1b','U2');wire('B2b','V2');wire('B3b','W2');
+wire('U1','M1u',[[130,1098]]);wire('V1','M1v');wire('W1','M1w',[[214,1098]]);
+wire('U2','M2u',[[436,1098]]);wire('V2','M2v');wire('W2','M2w',[[520,1098]]);
+motor('M1',['M1u','M1v','M1w'],'M1n');motor('M2',['M2u','M2v','M2w'],'M2n');
+// 퓨즈 → 조작회로
+wire('JF1','F1a');wire('F1a','F1b');wire('F1b','CTL',[[627,283],[627,116]]);
+wire('JF3','F3a');wire('F3a','F3b');wire('F3b','R683',[[627,343],[627,1193]]);
+// 상부 모선
+wire('CTL','EN1');sw('EOCRnc','EN1','EN2');wire('EN2','T1299');
+wire('T1299','T1410');wire('T1410','T1592');wire('T1592','T1785');wire('T1785','MC2a_t',[[1888,116]]);
+// EOCR / FR / YL / BZ
+wire('CTL','C533');wire('C533','EOc_t');load('EOCR','EOc_t','EOc_b');wire('EOc_b','R683');
+wire('C533','EP_t',[[783,533]]);sw('EOCRno','EP_t','EP_b');wire('EP_b','N783');
+wire('N783','FRc_t');load('FR','FRc_t','FRc_b');wire('FRc_b','R783');
+wire('N783','N890');wire('N890','FRa_t');sw('FRno','FRa_t','FRa_b');wire('FRa_b','YL_t');load('YL','YL_t','YL_b');wire('YL_b','R890');
+wire('N890','FRb_t',[[1001,785]]);sw('FRnc','FRb_t','FRb_b');wire('FRb_b','BZ_t');load('BZ','BZ_t','BZ_b');wire('BZ_b','R1001');
+// 자동 (SS-A, FLS, X)
+wire('T1299','SSA_t');sw('SSA','SSA_t','SSA_b');wire('SSA_b','NA');
+wire('NA','FLc_t',[[1101,533]]);load('FLS','FLc_t','FLc_b');wire('FLc_b','R1101');
+wire('NA','FL_t');sw('FLSc','FL_t','FL_b');wire('FL_b','Xc_t');load('X','Xc_t','Xc_b');wire('Xc_b','R1299');
+// 수동 (SS-M, PB0, PB1, T)
+wire('T1410','SSM_t');sw('SSM','SSM_t','SSM_b');wire('SSM_b','PB0_t');sw('PB0','PB0_t','PB0_b');wire('PB0_b','PBC');
+wire('PBC','PB1_t');sw('PB1','PB1_t','PB1_b');wire('PB1_b','N1410');
+wire('PBC','T13_t',[[1519,533]]);sw('T13','T13_t','T13_b');wire('T13_b','N1519');
+wire('N1410','N1519');wire('N1519','N1592');wire('N1592','T86_t',[[1690,785]]);
+wire('N1410','X14_t');sw('X14','X14_t','X14_b');wire('X14_b','Tc_t');load('T','Tc_t','Tc_b');wire('Tc_b','R1410');
+wire('T1592','X86_t');sw('X86','X86_t','X86_b');wire('X86_b','N1592');
+wire('N1592','MC1c_t');load('MC1','MC1c_t','MC1c_b');wire('MC1c_b','R1592');
+sw('T86','T86_t','T86_b');wire('T86_b','MC2c_t');load('MC2','MC2c_t','MC2c_b');wire('MC2c_b','R1690');
+wire('T1785','MC1a_t');sw('MC1a','MC1a_t','MC1a_b');wire('MC1a_b','RL_t');load('RL','RL_t','RL_b');wire('RL_b','R1785');
+sw('MC2a','MC2a_t','MC2a_b');wire('MC2a_b','GL_t');load('GL','GL_t','GL_b');wire('GL_b','R1888');
+// 하부 모선
+{const xs=[683,783,890,1001,1101,1299,1410,1592,1690,1785,1888];for(let i=0;i<xs.length-1;i++)wire('R'+xs[i],'R'+xs[i+1]);}
+
+/* ───────────── 상태 ───────────── */
+const E1=85,E2=30; // 수위 전극 위치(%)
+const S={mccb:false,ssA:false,pb0:false,pb1:false,trip:false,
+  X:false,Tcoil:false,Tel:0,Tset:5,Tdone:false,MC1:false,MC2:false,
+  FR:false,frT:0,frPer:1,frOut:false,flsLatch:false,flsOut:false,
+  level:50,mode:'supply',valve:true,m1:0,m2:0,a1:0,a2:0};
+
+function isClosed(id){
+  if(id.startsWith('CB'))return S.mccb;
+  if(id.startsWith('MC1p'))return S.MC1;
+  if(id.startsWith('MC2p'))return S.MC2;
+  switch(id){
+    case 'EOCRnc':return !S.trip; case 'EOCRno':return S.trip;
+    case 'FRno':return S.FR&&S.frOut; case 'FRnc':return !(S.FR&&S.frOut);
+    case 'SSA':return S.ssA; case 'SSM':return !S.ssA;
+    case 'PB0':return !S.pb0; case 'PB1':return S.pb1;
+    case 'FLSc':return S.flsOut; case 'T13':return S.Tcoil;
+    case 'X14':return !S.X; case 'X86':return S.X; case 'T86':return S.Tdone;
+    case 'MC1a':return S.MC1; case 'MC2a':return S.MC2;
+  }
+  return false;
+}
+
+/* ───────────── 회로 해석 ───────────── */
+const SRC={S1:'L1',S2:'L2',S3:'L3'};
+function solve(){
+  const adj={};for(const k in P)adj[k]=[];
+  const cond=[];
+  E.forEach((e,i)=>{if(e.type==='wire'||(e.type==='sw'&&isClosed(e.id)))cond.push(i)});
+  for(const i of cond){const e=E[i];adj[e.a].push(e.b);adj[e.b].push(e.a)}
+  // 전압 라벨 (어느 상에 연결되어 있는가)
+  const lab={};
+  for(const s in SRC){if(lab[s])continue;lab[s]=SRC[s];const q=[s];
+    while(q.length){const u=q.shift();for(const v of adj[u])if(!lab[v]){lab[v]=SRC[s];q.push(v)}}}
+  // 부하 여자 판정
+  const en={},fl=[...cond];
+  E.forEach((e,i)=>{
+    if(e.type==='load'){const on=!!(lab[e.a]&&lab[e.b]&&lab[e.a]!==lab[e.b]);en[e.id]=on;if(on)fl.push(i)}
+    else if(e.type==='motor'){const ls=e.t.map(t=>lab[t]);const on=ls.every(Boolean)&&new Set(ls).size===3;en[e.id]=on;if(on)fl.push(...e.parts)}
+  });
+  // 전류 경로: 막다른 가지 제거
+  const adjF={},deg={};
+  for(const i of fl){const e=E[i];(adjF[e.a]=adjF[e.a]||[]).push(i);(adjF[e.b]=adjF[e.b]||[]).push(i)}
+  for(const k in adjF)deg[k]=adjF[k].length;
+  const alive=new Set(fl);
+  const q=Object.keys(deg).filter(k=>deg[k]===1&&!SRC[k]);
+  while(q.length){const u=q.pop();if(deg[u]!==1)continue;
+    for(const i of adjF[u])if(alive.has(i)){alive.delete(i);deg[u]--;const e=E[i];const v=e.a===u?e.b:e.a;deg[v]--;if(deg[v]===1&&!SRC[v])q.push(v);break}}
+  // 방향: 전원으로부터 거리
+  const dist={};
+  for(const s in SRC){if(!adjF[s])continue;dist[s]=0;const qq=[s];
+    while(qq.length){const u=qq.shift();for(const i of adjF[u]){if(!alive.has(i))continue;const e=E[i];if(e.type!=='wire'&&e.type!=='sw')continue;
+      const v=e.a===u?e.b:e.a;if(dist[v]===undefined){dist[v]=dist[u]+1;qq.push(v)}}}}
+  const fwd=new Map();
+  for(const i of alive){const e=E[i];if(e.type!=='wire'&&e.type!=='sw')continue;
+    let f=(dist[e.a]??0)<=(dist[e.b]??0);if(lab[e.a]==='L3')f=!f;fwd.set(i,f)}
+  return {lab,en,alive,fwd};
+}
+
+/* ───────────── 사운드 (Web Audio) ───────────── */
+const Snd={ctx:null,master:null,on:true,vol:.7,noise:null,mot:[],bz:null,
+  init(){
+    if(this.ctx){if(this.ctx.state==='suspended')this.ctx.resume();return}
+    const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+    const c=this.ctx=new AC();
+    this.master=c.createGain();this.master.gain.value=this.on?this.vol:0;this.master.connect(c.destination);
+    const len=c.sampleRate*2,b=c.createBuffer(1,len,c.sampleRate),d=b.getChannelData(0);
+    for(let i=0;i<len;i++)d[i]=Math.random()*2-1;this.noise=b;
+    this.mot=[this.mkMotor(1),this.mkMotor(0.9)];
+    // 부저
+    const o=c.createOscillator();o.type='square';o.frequency.value=440;
+    const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2600;
+    const g=c.createGain();g.gain.value=0;o.connect(lp).connect(g).connect(this.master);o.start();this.bz=g;
+  },
+  setVol(){if(this.master)this.master.gain.setTargetAtTime(this.on?this.vol:0,this.ctx.currentTime,.02)},
+  burst(t,freq,q,peak,dec){const c=this.ctx;
+    const s=c.createBufferSource();s.buffer=this.noise;const f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=freq;f.Q.value=q;
+    const g=c.createGain();g.gain.setValueAtTime(peak,t);g.gain.exponentialRampToValueAtTime(.0008,t+dec);
+    s.connect(f).connect(g).connect(this.master);s.start(t,Math.random()*1.5);s.stop(t+dec+.03)},
+  thump(t,f0,peak,dec){const c=this.ctx;const o=c.createOscillator();o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f0*.5,t+dec);
+    const g=c.createGain();g.gain.setValueAtTime(peak,t);g.gain.exponentialRampToValueAtTime(.0008,t+dec);o.connect(g).connect(this.master);o.start(t);o.stop(t+dec+.02)},
+  click(kind){
+    if(!this.ctx)return;const t=this.ctx.currentTime+.005;
+    switch(kind){
+      case 'relay':this.burst(t,3600,1.1,.7,.025);this.burst(t+.009,4200,1.3,.3,.015);break;
+      case 'relayOff':this.burst(t,2900,1.1,.5,.02);this.burst(t+.007,3300,1.2,.2,.012);break;
+      case 'mc':this.burst(t,1300,.8,1,.06);this.thump(t,140,.7,.07);this.burst(t+.012,1700,1,.4,.03);break;
+      case 'mcOff':this.burst(t,1000,.8,.8,.05);this.thump(t,110,.5,.06);break;
+      case 'tick':this.burst(t,5200,1.5,.35,.012);break;
+      case 'sw':this.burst(t,2400,1,.55,.02);break;
+      case 'mccb':this.burst(t,700,.7,1,.09);this.thump(t,90,.8,.1);break;
+    }
+  },
+  mkMotor(p){const c=this.ctx;
+    const out=c.createGain();out.gain.value=0;out.connect(this.master);
+    const o1=c.createOscillator();o1.type='sawtooth';const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=700;
+    const g1=c.createGain();g1.gain.value=.3;o1.connect(lp).connect(g1).connect(out);
+    const wh=c.createOscillator();wh.type='triangle';const gw=c.createGain();gw.gain.value=.06;wh.connect(gw).connect(out);
+    const ns=c.createBufferSource();ns.buffer=this.noise;ns.loop=true;const bp=c.createBiquadFilter();bp.type='bandpass';bp.Q.value=.8;
+    const gn=c.createGain();gn.gain.value=.35;ns.connect(bp).connect(gn).connect(out);
+    const hum=c.createOscillator();hum.frequency.value=120;const gh=c.createGain();gh.gain.value=0;hum.connect(gh).connect(this.master);
+    o1.start();wh.start();ns.start();hum.start();
+    return {p,out,o1,wh,bp,gh};
+  },
+  motor(i,spd,ener){if(!this.ctx)return;const m=this.mot[i],t=this.ctx.currentTime;
+    m.o1.frequency.setTargetAtTime((22+98*spd)*m.p,t,.04);
+    m.wh.frequency.setTargetAtTime((260+1150*spd)*m.p,t,.04);
+    m.bp.frequency.setTargetAtTime(350+1500*spd,t,.04);
+    m.out.gain.setTargetAtTime(.2*Math.pow(spd,1.3),t,.04);
+    m.gh.gain.setTargetAtTime(ener?.04:0,t,.03)},
+  buzz(on){if(this.bz)this.bz.gain.setTargetAtTime(on?.09:0,this.ctx.currentTime,.008)}
+};
+
+/* ───────────── 정적 도면 ───────────── */
+const W=G.w,PT=G.p;
+function line(pts,parent=W,cls='wire'){return el('path',{d:toD(pts),class:cls},parent)}
+function toD(pts){return pts.map((p,i)=>(i?'L':'M')+p.x+','+p.y).join(' ')}
+function ground(x,y){const g=el('g',{stroke:'#1a1a1a','stroke-width':3},PT);
+  el('line',{x1:x,y1:y-12,x2:x,y2:y},g);el('line',{x1:x-14,y1:y,x2:x+14,y2:y},g);el('line',{x1:x-9,y1:y+6,x2:x+9,y2:y+6},g);el('line',{x1:x-4,y1:y+12,x2:x+4,y2:y+12},g)}
+function tb(x,y,w,xs){el('rect',{x,y,width:w,height:42,fill:'#bdbdbd',stroke:'#1a1a1a','stroke-width':3},PT);
+  for(const cx of xs)el('circle',{cx,cy:y+21,r:11,fill:'#fff',stroke:'#1a1a1a','stroke-width':3},PT)}
+
+// 배선 엣지 그리기 + 전류 오버레이
+E.forEach(e=>{
+  if(e.type==='wire'){e.path=line(e.pts);e.flow=el('path',{class:'flow',style:'display:none'},G.f)}
+  else if(e.type==='sw'){e.flow=el('path',{class:'flow',style:'display:none'},G.f)}
+});
+// 접속점
+const degW={};E.forEach(e=>{if(e.type==='wire'||e.type==='sw'){degW[e.a]=(degW[e.a]||0)+1;degW[e.b]=(degW[e.b]||0)+1}});
+const dots=[];for(const k in degW)if(degW[k]>=3)dots.push({k,c:el('circle',{cx:P[k].x,cy:P[k].y,r:6.5,fill:'#1a1a1a'},G.f)});
+
+// PE / 접지 / FLS 전극선 (정적)
+line([pt(256,72),pt(256,1064)]);line([pt(256,533),pt(562,533),pt(562,1064)]);
+line([pt(256,1064),pt(256,1192)]);line([pt(212,1150),pt(256,1150)]);ground(256,1205);
+line([pt(562,1064),pt(562,1192)]);line([pt(518,1150),pt(562,1150)]);ground(562,1205);
+el('circle',{cx:256,cy:533,r:6.5,fill:'#1a1a1a'},G.f);el('circle',{cx:256,cy:1150,r:6,fill:'#1a1a1a'},G.f);el('circle',{cx:562,cy:1150,r:6,fill:'#1a1a1a'},G.f);
+line([pt(1136,1055),pt(1236,1055),pt(1236,1068)]);line([pt(1208,1055),pt(1208,1226)]);ground(1236,1080);
+el('circle',{cx:1208,cy:1055,r:6,fill:'#1a1a1a'},G.f);
+line([pt(1139,1075),pt(1180,1075),pt(1180,1226)]);line([pt(1132,1092),pt(1153,1092),pt(1153,1226)]);
+
+tb(97,51,193,[130,172,214,256]);tb(97,1043,193,[130,172,214,256]);tb(402,1043,194,[436,478,520,562]);
+el('rect',{x:1135,y:1224,width:90,height:26,fill:'#bdbdbd',stroke:'#1a1a1a','stroke-width':3},PT);
+for(const x of [1153,1180,1208])el('circle',{cx:x,cy:1237,r:8,fill:'#fff',stroke:'#1a1a1a','stroke-width':2.5},PT);
+// 퓨즈
+for(const y of [283,343]){el('rect',{x:413,y:y-8,width:47,height:16,fill:'#fff',stroke:'#1a1a1a','stroke-width':3},PT);
+  el('line',{x1:418,y1:y+6,x2:455,y2:y-6,stroke:'#1a1a1a','stroke-width':3},PT)}
+// EOCR 본체(주회로)
+const eocrBox=el('rect',{x:108,y:413,width:128,height:54,fill:'#7fd9e0',stroke:'#1a1a1a','stroke-width':3},PT);
+const eocrBoxT=txt(172,452,'EOCR',{size:34,anchor:'middle',parent:PT});
+
+/* MCCB */
+const cbPoles=[],cbLink=el('g',{class:'mv'},PT);
+for(const x of [130,172,214]){
+  el('circle',{cx:x,cy:162,r:6.5,class:'term'},PT);el('circle',{cx:x,cy:222,r:6.5,class:'term'},PT);
+  const g=el('g',{class:'mv',style:`transform-origin:${x}px 222px`},PT);
+  el('path',{d:`M${x},168 C${x+24},176 ${x+24},208 ${x},216`,class:'blade','stroke-width':3.5},g);cbPoles.push(g)}
+el('line',{x1:148,y1:192,x2:232,y2:192,stroke:'#1a1a1a','stroke-width':3,'stroke-dasharray':'7 6'},cbLink);
+const cbState=txt(64,250,'OFF',{size:24,anchor:'middle',font:SANS,weight:'bold',color:'#868e96'});
+
+/* 전자접촉기 주접점 */
+function mcMain(xs){const poles=[];for(const x of xs){
+  el('circle',{cx:x,cy:820,r:6.5,class:'term'},PT);el('circle',{cx:x,cy:880,r:6.5,class:'term'},PT);
+  const g=el('g',{class:'mv',style:`transform-origin:${x}px 880px`},PT);
+  el('path',{d:`M${x+1},874 L${x+5},826 L${x+13},814`,class:'blade','stroke-width':3.5},g);poles.push(g)}
+  const lk=el('g',{class:'mv'},PT);el('line',{x1:xs[0]+6,y1:850,x2:xs[2]+8,y2:850,stroke:'#1a1a1a','stroke-width':3,'stroke-dasharray':'7 6'},lk);
+  return {poles,lk}}
+const mc1Main=mcMain([130,172,214]),mc2Main=mcMain([436,478,520]);
+
+/* 세로 접점 (시퀀스 도면 관례: a접점은 가동편이 오른쪽에 떨어져 있다가 붙고,
+   b접점은 왼쪽에 붙어 있다가 동작하면 왼쪽으로 떨어진다) */
+const CT={};
+const NC=new Set(['FRnc','SSM','PB0','X14']); // b접점
+function contact(id,x,yt,yb,kind){
+  el('circle',{cx:x,cy:yt,r:6.5,class:'term'},PT);el('circle',{cx:x,cy:yb,r:6.5,class:'term'},PT);
+  const nc=NC.has(id),bar=el('g',{class:'bar'},PT),bx=nc?x-6:x+6,ym=(yt+yb)/2;
+  el('line',{x1:bx,y1:yt-9,x2:bx,y2:yb+9,class:'blade'},bar);
+  const s={stroke:'#1a1a1a','stroke-width':3,fill:'none'};
+  if(kind==='pb')el('line',{x1:bx,y1:ym,x2:bx+13,y2:ym,...s},bar);
+  if(kind==='timer')el('path',{d:`M${bx+2},${ym-10} L${bx+14},${ym} L${bx+2},${ym+10}`,...s},bar);
+  if(kind==='flicker')el('path',{d:`M${bx-10},${ym} L${bx},${ym-7} L${bx+10},${ym} L${bx},${ym+7} Z`,...s,fill:'#fff'},bar);
+  if(kind==='eocr'){el('line',{x1:bx-7,y1:ym-7,x2:bx+7,y2:ym+7,...s},bar);el('line',{x1:bx-7,y1:ym+7,x2:bx+7,y2:ym-7,...s},bar)}
+  if(kind==='ssA')el('line',{x1:bx,y1:ym+2,x2:bx+12,y2:ym-8,...s},bar);
+  if(kind==='ssM')el('path',{d:`M${bx},${ym-7} L${bx+13},${ym} L${bx},${ym+7} Z`,fill:'#1a1a1a'},bar);
+  CT[id]={bar,horiz:false,nc};
+}
+contact('EOCRno',783,622,690,'eocr');
+contact('FRno',890,878,940,'flicker');contact('FRnc',1001,878,940,'flicker');
+contact('SSA',1299,208,277,'ssA');contact('SSM',1410,208,277,'ssM');
+contact('PB0',1410,375,442,'pb');contact('PB1',1410,626,694,'pb');
+contact('FLSc',1299,626,694);contact('T13',1519,626,694);
+contact('X14',1410,878,940);contact('X86',1592,208,277);contact('T86',1690,878,940,'timer');
+contact('MC1a',1785,208,277);contact('MC2a',1888,208,277);
+// SS 연동 점선
+const ssLink=el('line',{y1:242,y2:242,stroke:'#1a1a1a','stroke-width':3,'stroke-dasharray':'7 6'},PT);
+// EOCR b접점(상부, 가로형)
+{el('circle',{cx:767,cy:116,r:6.5,class:'term'},PT);el('circle',{cx:835,cy:116,r:6.5,class:'term'},PT);
+ const bar=el('g',{class:'bar'},PT);el('line',{x1:757,y1:123,x2:845,y2:123,class:'blade'},bar);
+ el('line',{x1:794,y1:116,x2:808,y2:130,stroke:'#1a1a1a','stroke-width':3},bar);el('line',{x1:794,y1:130,x2:808,y2:116,stroke:'#1a1a1a','stroke-width':3},bar);
+ CT.EOCRnc={bar,horiz:true}}
+
+/* 코일 / 램프 / 부저 */
+const LD={};
+function coil(id,x,label,fill,onFill,size=36){
+  const g=el('g',{},PT);
+  const halo=el('circle',{cx:x,cy:1068,r:54,fill:onFill,opacity:.3,style:'display:none'},g);
+  const c=el('circle',{cx:x,cy:1068,r:38,fill,stroke:'#1a1a1a','stroke-width':2.6},g);
+  const t=txt(x,1080,label,{size,anchor:'middle',parent:g});
+  LD[id]={g,c,t,halo,fill,onFill};
+}
+coil('EOCR',683,'EOCR','#e6f3f3','#22c3c3',23);coil('FR',783,'FR','#f6e9f1','#e64fa6');
+coil('YL',890,'YL','#f4f1e4','#ffd400');coil('FLS',1101,'FLS','#eeeeee','#8f969d',30);
+coil('X',1299,'X','#e6f3f7','#00b4e6');coil('T',1410,'T','#e7f3ec','#14b866');
+coil('MC1',1592,'MC_1','#f7ede4','#ff7a00',28);coil('MC2',1690,'MC_2','#f7ede4','#ff7a00',28);
+coil('RL',1785,'RL','#f5e6e9','#ff1e3c');coil('GL',1888,'GL','#e9f0e2','#3fd23f');
+{const g=el('g',{},PT);const halo=el('rect',{x:952,y:1018,width:98,height:100,rx:10,fill:'#ff922b',opacity:.3,style:'display:none'},g);
+ const c=el('rect',{x:964,y:1032,width:74,height:72,fill:'#e8eeeb',stroke:'#1a1a1a','stroke-width':2.6},g);
+ const t=txt(1001,1080,'BZ',{size:34,anchor:'middle',parent:g});
+ const waves=el('g',{style:'display:none',stroke:'#1a1a1a','stroke-width':2.5,fill:'none'},g);
+ el('path',{d:'M1044,1050 Q1056,1068 1044,1086'},waves);el('path',{d:'M1052,1040 Q1068,1068 1052,1096'},waves);
+ LD.BZ={g,c,t,halo,waves,fill:'#e8eeeb',onFill:'#ff922b'}}
+// 전동기
+const MOT={};
+function mkMotor(id,cx,label){
+  const glow=el('circle',{cx,cy:1150,r:50,fill:'#4dabf7',opacity:0},PT);
+  el('circle',{cx,cy:1150,r:40,fill:'#0f62c4',stroke:'#0b3f7f','stroke-width':2.5},PT);
+  const rot=el('g',{opacity:.0},PT);
+  for(let k=0;k<3;k++)el('path',{d:`M${cx},1150 Q${cx+14},${1150-18} ${cx+4},${1150-35} Q${cx-8},${1150-20} ${cx},1150 Z`,fill:'#9fd3ff',transform:`rotate(${k*120} ${cx} 1150)`},rot);
+  txt(cx,1162,label,{size:34,anchor:'middle',color:'#fff',parent:PT});
+  MOT[id]={rot,glow,cx};
+}
+mkMotor('M1',172,'M1');mkMotor('M2',478,'M2');
+
+/* 타이머 표시창 */
+const tBox=el('g',{},PT);
+el('rect',{x:1434,y:1116,width:102,height:46,rx:7,fill:'#f2fbf6',stroke:C.teal,'stroke-width':2},tBox);
+const tTxt=txt(1485,1140,'5.0s',{size:20,anchor:'middle',font:SANS,weight:'bold',color:'#0b6e5c',parent:tBox});
+el('rect',{x:1442,y:1148,width:86,height:7,rx:3,fill:'#d3ece2'},tBox);
+const tBar=el('rect',{x:1442,y:1148,width:0,height:7,rx:3,fill:'#12b886'},tBox);
+
+/* 수조 (FLS 전극봉) */
+const tank=el('g',{},PT);
+const pipeL=line([pt(915,222),pt(992,222)],tank,'wire');pipeL.setAttribute('stroke-width',10);pipeL.setAttribute('stroke','#adb5bd');
+const pipeR=line([pt(1168,420),pt(1245,420)],tank,'wire');pipeR.setAttribute('stroke-width',10);pipeR.setAttribute('stroke','#adb5bd');
+const flowL=el('path',{d:'M915,222 L992,222',class:'flow',style:'stroke:#4dabf7;display:none'},tank);
+const flowR=el('path',{d:'M1168,420 L1245,420',class:'flow',style:'stroke:#4dabf7;display:none'},tank);
+const water=el('rect',{x:992,y:300,width:176,height:143,fill:'#74c0fc',opacity:.8,'clip-path':'url(#tankClip)'},tank);
+el('rect',{x:990,y:195,width:180,height:250,fill:'none',stroke:'#495057','stroke-width':4},tank);
+const yOf=l=>445-2.5*l;
+for(const [lv,lab] of [[E1,'E1 상한'],[E2,'E2 하한']]){
+  el('line',{x1:992,y1:yOf(lv),x2:1168,y2:yOf(lv),stroke:'#868e96','stroke-width':1.5,'stroke-dasharray':'5 5'},tank);
+  txt(1176,yOf(lv)+7,lab,{size:20,font:SANS,color:'#495057',parent:tank})}
+for(const [x,lv,lb] of [[1035,E1,'E1'],[1080,E2,'E2'],[1125,3,'E3']]){
+  el('line',{x1:x,y1:170,x2:x,y2:yOf(lv),stroke:'#495057','stroke-width':5,'stroke-linecap':'round'},tank);
+  txt(x,165,lb,{size:18,anchor:'middle',font:SANS,weight:'bold',color:'#495057',parent:tank})}
+const lvlTxt=txt(1080,330,'50%',{size:26,anchor:'middle',font:SANS,weight:'bold',color:'#0b4f8a',parent:tank});
+const pumpTxt=txt(984,256,'',{size:21,anchor:'end',font:SANS,color:'#343a40',parent:tank});
+const valveG=el('g',{},tank);
+const valve=el('path',{d:'M1194,408 L1194,432 L1216,408 L1216,432 Z',fill:'#40c057',stroke:'#1a1a1a','stroke-width':2},valveG);
+const valveTxt=txt(1205,468,'',{size:20,anchor:'middle',font:SANS,color:'#343a40',parent:tank});
+txt(1080,506,'수조 (FLS 전극봉 → TB₄)',{size:21,anchor:'middle',font:SANS,color:'#495057',parent:tank});
+
+/* ───────────── 라벨 ───────────── */
+txt(97,36,'L_1',{});txt(146,36,'L_2',{});txt(196,36,'L_3',{});txt(240,36,'PE',{});
+txt(22,85,'TB_1',{});txt(305,85,'3P3W AC 220V',{});
+txt(137,130,'갈',{size:30});txt(179,130,'흑',{size:30});txt(221,130,'회',{size:30});txt(262,130,'녹–황',{size:30});
+txt(16,203,'MCCB',{});txt(312,262,'갈',{size:30});txt(390,258,'FUSE',{});txt(312,326,'회',{size:30});
+num(101,397,'1',C.red);num(144,397,'2',C.red);num(187,397,'3',C.red);
+num(101,507,'7',C.red);num(144,507,'8',C.red);num(187,507,'9',C.red);
+txt(285,515,'녹–황',{size:30});txt(312,575,'회',{size:30});txt(312,633,'흑',{size:30});txt(312,690,'갈',{size:30});
+num(101,802,'1',C.red);num(144,802,'2',C.red);num(187,802,'3',C.red);
+num(101,925,'7',C.red);num(144,925,'8',C.red);num(187,925,'9',C.red);txt(50,862,'MC_1',{});
+num(407,802,'1',C.red);num(450,802,'2',C.red);num(493,802,'3',C.red);
+num(407,925,'7',C.red);num(450,925,'8',C.red);num(493,925,'9',C.red);txt(355,862,'MC_2',{});
+txt(135,1030,'U_1',{size:28});txt(176,1030,'V_1',{size:28});txt(216,1030,'W_1',{size:28});txt(259,1030,'PE',{size:28});
+txt(441,1030,'U_2',{size:28});txt(482,1030,'V_2',{size:28});txt(522,1030,'W_2',{size:28});txt(565,1030,'PE',{size:28});
+txt(22,1078,'TB_2',{});txt(328,1078,'TB_3',{});
+num(695,100,'10',C.blk);txt(752,100,'EOCR',{});num(868,100,'4',C.blk);
+num(727,596,'10',C.blk);txt(818,668,'EOCR',{});num(746,738,'5',C.blk);
+num(929,823,'8',C.olive);txt(924,920,'FR',{});txt(1014,920,'FR',{});num(853,986,'6',C.olive);num(958,986,'5',C.olive);
+num(650,1015,'6',C.blk);num(632,1146,'12',C.blk);num(749,1015,'2',C.olive);num(749,1146,'7',C.olive);
+num(1064,1015,'5',C.pur);num(1064,1146,'6',C.pur);num(1143,1040,'1',C.pur);num(1156,1090,'8',C.pur);num(1127,1134,'7',C.pur);
+num(1268,1015,'2',C.blue);num(1268,1146,'7',C.blue);num(1380,1015,'2',C.teal);num(1380,1146,'7',C.teal);
+num(1563,1022,'6',C.red);num(1545,1152,'12',C.red);num(1660,1022,'6',C.red);num(1642,1152,'12',C.red);
+const ssA_t=txt(1258,318,'A',{});const ssM_t=txt(1356,318,'M',{});txt(1434,258,'SS',{});
+txt(1434,422,'PB_0',{});txt(1452,676,'PB_1',{});txt(1550,676,'T',{});txt(1330,676,'FLS',{});
+num(1267,607,'4',C.pur);num(1267,738,'3',C.pur);num(1489,607,'1',C.teal);num(1489,738,'3',C.teal);
+num(1550,204,'8',C.blue);num(1559,316,'6',C.blue);txt(1622,258,'X',{});
+num(1742,206,'4',C.red);num(1733,316,'10',C.red);txt(1815,258,'MC_1',{});
+num(1848,206,'4',C.red);num(1840,316,'10',C.red);txt(1917,258,'MC_2',{});
+num(1370,858,'1',C.blue);num(1356,958,'4',C.blue);txt(1424,920,'X',{});
+num(1652,858,'8',C.teal);num(1662,972,'6',C.teal);txt(1732,920,'T',{});
+txt(1060,1250,'TB_4',{});txt(1120,1292,'E_1',{size:28});txt(1166,1292,'E_2',{size:28});txt(1212,1292,'E_3',{size:28});
+const tripTxt=txt(268,450,'',{size:26,anchor:'start',font:SANS,weight:'bold',color:'#e03131'});
+
+/* ───────────── 클릭 영역 ───────────── */
+function hit(x,y,w,h,title,opt={}){const r=el(opt.circle?'circle':'rect',opt.circle?{cx:x,cy:y,r:w,class:'hit'}:{x,y,width:w,height:h,rx:8,class:'hit'},G.h);
+  el('title',{},r).textContent=title;return r}
+function onClick(r,f){r.addEventListener('click',e=>{Snd.init();f(e)})}
+function onPress(r,key){
+  r.addEventListener('pointerdown',e=>{e.preventDefault();Snd.init();r.setPointerCapture(e.pointerId);if(!S[key]){S[key]=true;Snd.click('sw')}});
+  const up=()=>{if(S[key]){S[key]=false;Snd.click('sw')}};
+  r.addEventListener('pointerup',up);r.addEventListener('pointercancel',up);r.addEventListener('lostpointercapture',up)}
+
+onClick(hit(92,148,160,84,'MCCB — 클릭: 전원 ON/OFF'),()=>{S.mccb=!S.mccb;Snd.click('mccb')});
+onClick(hit(1282,192,170,100,'SS 셀렉터 스위치 — 클릭: 자동(A) ↔ 수동(M)'),()=>{S.ssA=!S.ssA;Snd.click('sw')});
+onPress(hit(1392,360,92,96,'PB₀ 정지 — 누르고 있는 동안 동작'),'pb0');
+onPress(hit(1392,612,104,96,'PB₁ 기동 — 누르고 있는 동안 동작'),'pb1');
+const tripF=()=>{S.trip=!S.trip;Snd.click('relay')};
+for(const r of [hit(100,405,144,70,'EOCR — 클릭: 과부하 트립 / 리셋'),hit(683,1068,44,0,'EOCR — 클릭: 트립 / 리셋',{circle:1}),
+  hit(752,96,104,46,'EOCR b접점 — 클릭: 트립 / 리셋'),hit(766,608,52,96,'EOCR a접점 — 클릭: 트립 / 리셋')])onClick(r,tripF);
+const flsF=()=>{S.level=S.level>=50?15:92;syncPanel()};
+for(const r of [hit(1101,1068,44,0,'FLS — 클릭: 수위 저/고 전환',{circle:1}),hit(1282,612,104,96,'FLS 접점 — 클릭: 수위 저/고 전환'),
+  hit(1100,1212,150,90,'FLS 전극 E₁·E₂·E₃ — 클릭: 수위 저/고 전환 → FLS 동작/정지')])onClick(r,flsF);
+for(const r of [hit(1410,1068,44,0,'타이머 T — 클릭: 시간 설정',{circle:1}),hit(1430,1112,110,54,'타이머 T — 클릭: 시간 설정'),
+  hit(1672,864,90,90,'T 한시 접점 — 클릭: 시간 설정'),hit(1502,612,66,96,'T 순시 접점 — 클릭: 시간 설정')])onClick(r,e=>openPop('T',e));
+for(const r of [hit(783,1068,44,0,'플리커 릴레이 FR — 클릭: 주기 설정',{circle:1})])onClick(r,e=>openPop('FR',e));
+// 수조 드래그
+{const r=hit(985,190,190,262,'수조 — 드래그: 수위 조절');
+ const setL=e=>{const p=svgPt(e);S.level=Math.max(0,Math.min(100,(445-p.y)/2.5));syncPanel()};
+ r.addEventListener('pointerdown',e=>{Snd.init();r.setPointerCapture(e.pointerId);setL(e);r._d=1});
+ r.addEventListener('pointermove',e=>{if(r._d)setL(e)});
+ r.addEventListener('pointerup',()=>r._d=0);
+ onClick(hit(1186,398,40,44,'밸브 — 클릭: 열림/닫힘'),()=>{S.valve=!S.valve;Snd.click('sw');syncPanel()});}
+function svgPt(e){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse())}
+
+/* ───────────── 시뮬레이션 루프 ───────────── */
+function settle(){
+  let res;
+  for(let i=0;i<12;i++){
+    res=solve();const en=res.en;let ch=false;
+    if(en.X!==S.X){S.X=en.X;Snd.click(en.X?'relay':'relayOff');ch=true}
+    if(en.T!==S.Tcoil){S.Tcoil=en.T;Snd.click(en.T?'relay':'relayOff');if(!en.T){S.Tel=0;S.Tdone=false}ch=true}
+    if(en.MC1!==S.MC1){S.MC1=en.MC1;Snd.click(en.MC1?'mc':'mcOff');ch=true}
+    if(en.MC2!==S.MC2){S.MC2=en.MC2;Snd.click(en.MC2?'mc':'mcOff');ch=true}
+    if(en.FR!==S.FR){S.FR=en.FR;S.frT=0;S.frOut=false;Snd.click(en.FR?'relay':'relayOff');ch=true}
+    if(!en.FLS)S.flsLatch=false;
+    else if(S.mode==='supply'){if(S.level<=E2)S.flsLatch=true;else if(S.level>=E1)S.flsLatch=false}
+    else{if(S.level>=E1)S.flsLatch=true;else if(S.level<=E2)S.flsLatch=false}
+    const fo=en.FLS&&S.flsLatch;if(fo!==S.flsOut){S.flsOut=fo;Snd.click('tick');ch=true}
+    if(!ch)break;
+  }
+  return res;
+}
+
+let lastSig='',last=performance.now(),res=null;
+function step(now){
+  const dt=Math.min(.1,(now-last)/1000);last=now;
+  if(S.Tcoil){S.Tel+=dt;if(!S.Tdone&&S.Tel>=S.Tset){S.Tdone=true;Snd.click('tick')}}
+  if(S.FR){S.frT+=dt;const o=Math.floor(S.frT/(S.frPer/2))%2===1;if(o!==S.frOut){S.frOut=o;Snd.click('tick')}}
+  const pumpQ=8*S.m1,natQ=S.valve?3:0;
+  S.level+=(S.mode==='supply'?pumpQ-natQ:natQ-pumpQ)*dt;S.level=Math.max(0,Math.min(100,S.level));
+  res=settle();
+  const k1=res.en.M1?1:0,k2=res.en.M2?1:0;
+  S.m1+=(k1-S.m1)*(1-Math.exp(-dt/(k1?.7:1.5)));S.m2+=(k2-S.m2)*(1-Math.exp(-dt/(k2?.7:1.5)));
+  if(S.m1<.002)S.m1=0;if(S.m2<.002)S.m2=0;
+  S.a1=(S.a1+S.m1*900*dt)%360;S.a2=(S.a2+S.m2*900*dt)%360;
+  const sig=[...res.alive].sort((a,b)=>a-b).map(i=>i+(res.fwd.get(i)?'f':'r')).join(',')+'|'+
+    E.filter(e=>e.type==='sw').map(e=>isClosed(e.id)?1:0).join('')+'|'+JSON.stringify(res.en)+S.trip+S.mccb+S.ssA;
+  if(sig!==lastSig){lastSig=sig;render()}
+  perFrame();
+  requestAnimationFrame(step);
+}
+
+function render(){
+  const {lab,en,alive,fwd}=res;
+  E.forEach((e,i)=>{
+    if(e.type==='wire'){const l=lab[e.a];e.path.setAttribute('class','wire'+(l?' v'+l:''))}
+    if(e.flow){if(alive.has(i)){const p=fwd.get(i)?e.pts:[...e.pts].reverse();e.flow.setAttribute('d',toD(p));e.flow.style.display=''}
+      else e.flow.style.display='none'}
+  });
+  for(const d of dots){const l=lab[d.k];d.c.setAttribute('fill',l&&!svg.classList.contains('novolt')?{L1:'#8b4513',L2:'#111',L3:'#7a7f85'}[l]:(svg.classList.contains('novolt')?'#1a1a1a':'#b5bbc2'))}
+  // 접점
+  for(const id in CT){const c=CT[id],cl=isClosed(id);c.bar.style.transform=c.horiz?`translateY(${cl?0:15}px)`:`translateX(${cl?0:(c.nc?-15:15)}px)`}
+  const ax=1305+(isClosed('SSA')?0:15),mx=1404+(isClosed('SSM')?0:-15);ssLink.setAttribute('x1',ax);ssLink.setAttribute('x2',mx);
+  ssA_t.setAttribute('fill',S.ssA?'#2f9e44':'#1a1a1a');ssA_t.setAttribute('font-weight',S.ssA?'bold':'normal');
+  ssM_t.setAttribute('fill',!S.ssA?'#2f9e44':'#1a1a1a');ssM_t.setAttribute('font-weight',!S.ssA?'bold':'normal');
+  cbPoles.forEach(g=>g.style.transform=S.mccb?'none':'rotate(28deg)');cbLink.style.transform=S.mccb?'none':'translateX(14px)';
+  cbState.textContent=S.mccb?'ON':'OFF';cbState.setAttribute('fill',S.mccb?'#2f9e44':'#868e96');
+  for(const [m,on] of [[mc1Main,S.MC1],[mc2Main,S.MC2]]){m.poles.forEach(g=>g.style.transform=on?'rotate(-5deg)':'rotate(18deg)');m.lk.style.transform=on?'translateX(-3px)':'translateX(8px)'}
+  // EOCR
+  eocrBox.setAttribute('fill',S.trip?'#ff8787':'#7fd9e0');tripTxt.textContent=S.trip?'TRIP':'';
+  // 부하
+  for(const id in LD){const L=LD[id],on=!!en[id];
+    L.c.setAttribute('fill',on?L.onFill:L.fill);L.c.setAttribute('filter',on?'url(#glow)':'');
+    L.c.setAttribute('stroke',on?'#000':'#1a1a1a');L.c.setAttribute('stroke-width',on?4:2.6);
+    L.halo.style.display=on?'':'none';L.halo.setAttribute('opacity',['YL','RL','GL','BZ'].includes(id)?.4:.22);
+    L.t.setAttribute('font-weight',on?'bold':'normal');
+    L.t.setAttribute('fill',on&&['RL','GL','MC1','MC2','X','T','FR'].includes(id)?'#fff':'#1a1a1a');
+    if(L.waves)L.waves.style.display=on?'':'none'}
+  Snd.buzz(!!en.BZ);
+  updateStatus();
+}
+
+function perFrame(){
+  for(const [id,spd,a] of [['M1',S.m1,S.a1],['M2',S.m2,S.a2]]){const M=MOT[id];
+    M.rot.setAttribute('transform',`rotate(${a} ${M.cx} 1150)`);M.rot.setAttribute('opacity',spd>0?.35+.55*spd:0);M.glow.setAttribute('opacity',spd*.35)}
+  Snd.motor(0,S.m1,!!res.en.M1);Snd.motor(1,S.m2,!!res.en.M2);
+  // 타이머
+  const el_=S.Tcoil?Math.min(S.Tel,S.Tset):0;
+  tTxt.textContent=S.Tcoil?(S.Tdone?`완료 ${S.Tset.toFixed(1)}s`:`${el_.toFixed(1)} / ${S.Tset.toFixed(1)}s`):`설정 ${S.Tset.toFixed(1)}s`;
+  tBar.setAttribute('width',86*(S.Tset?el_/S.Tset:0));tBar.setAttribute('fill',S.Tdone?'#f76707':'#12b886');
+  // 수조
+  const lv=S.level;water.setAttribute('y',yOf(lv));water.setAttribute('height',2.5*lv);lvlTxt.textContent=Math.round(lv)+'%';
+  lvlTxt.setAttribute('y',Math.min(430,Math.max(240,yOf(lv)+30)));
+  const sup=S.mode==='supply';
+  pumpTxt.textContent=sup?'M1 급수펌프':'M1 배수펌프';
+  valveTxt.textContent=(sup?'유출 ':'유입 ')+(S.valve?'열림':'닫힘');
+  valve.setAttribute('fill',S.valve?'#40c057':'#fa5252');
+  flowL.style.display=S.m1>.05?'':'none';flowL.setAttribute('d',sup?'M915,222 L992,222':'M992,222 L915,222');
+  flowR.style.display=S.valve&&(sup?lv>0:lv<100)?'':'none';flowR.setAttribute('d',sup?'M1168,420 L1245,420':'M1245,420 L1168,420');
+  const lo=document.getElementById('lvlO'),li=document.getElementById('lvl');
+  if(document.activeElement!==li)li.value=Math.round(lv);lo.textContent=Math.round(lv)+'%';
+  updateStatus();
+}
+
+/* ───────────── 패널 ───────────── */
+let statSig='';
+function updateStatus(){
+  if(!res)return;const en=res.en;
+  const items=[['전원 MCCB',S.mccb?'on':'',S.mccb?'ON':'OFF'],['모드 SS',S.ssA?'amber':'on',S.ssA?'자동(A)':'수동(M)'],
+    ['EOCR',S.trip?'warn':(en.EOCR?'on':''),S.trip?'트립':'정상'],['X 릴레이',en.X?'on':'',''],
+    ['T 타이머',en.T?(S.Tdone?'amber':'on'):'',en.T?(S.Tdone?'타임업':S.Tel.toFixed(1)+'s'):''],['FR 플리커',en.FR?'amber':'',''],
+    ['MC₁ / M1',en.MC1?'on':'',en.MC1?'운전':''],['MC₂ / M2',en.MC2?'on':'',en.MC2?'운전':''],
+    ['FLS 출력',S.flsOut?'on':'',en.FLS?'':'무전원'],['수위',S.level<=E2?'amber':'',Math.round(S.level)+'%'],
+    ['RL',en.RL?'warn':'',''],['GL',en.GL?'on':'',''],['YL',en.YL?'amber':'',''],['BZ',en.BZ?'warn':'','']];
+  const h=items.map(([a,c,v])=>`<div><span class="led ${c}"></span>${a}${v?` <b style="margin-left:auto">${v}</b>`:''}</div>`).join('');
+  if(h!==statSig){statSig=h;document.getElementById('stat').innerHTML=h}
+}
+const $=id=>document.getElementById(id);
+function syncPanel(){
+  $('tset').value=S.Tset;$('tsetO').textContent=S.Tset.toFixed(1)+'s';
+  $('frset').value=S.frPer;$('frsetO').textContent=S.frPer.toFixed(1)+'s';
+  $('mode').value=S.mode;$('valve').checked=S.valve;$('valveT').textContent=S.valve?'밸브 열림':'밸브 닫힘';
+}
+$('tset').oninput=e=>{S.Tset=+e.target.value;syncPanel()};
+$('frset').oninput=e=>{S.frPer=+e.target.value;syncPanel()};
+$('lvl').oninput=e=>{S.level=+e.target.value};
+$('mode').onchange=e=>{S.mode=e.target.value;S.flsLatch=false};
+$('valve').onchange=e=>{S.valve=e.target.checked;syncPanel()};
+$('vol').oninput=e=>{Snd.vol=+e.target.value;$('volO').textContent=Math.round(Snd.vol*100)+'%';Snd.setVol()};
+$('showFlow').onchange=e=>svg.classList.toggle('noflow',!e.target.checked);
+$('showVolt').onchange=e=>{svg.classList.toggle('novolt',!e.target.checked);lastSig=''};
+$('bSound').onclick=()=>{Snd.init();Snd.on=!Snd.on;Snd.setVol();$('bSound').textContent=Snd.on?'🔊 소리 켜짐':'🔇 소리 꺼짐';$('bSound').classList.toggle('on',Snd.on)};
+$('bReset').onclick=()=>{Object.assign(S,{mccb:false,ssA:false,pb0:false,pb1:false,trip:false,level:50,valve:true,mode:'supply',flsLatch:false});syncPanel()};
+document.addEventListener('pointerdown',()=>Snd.init(),{capture:true});
+
+/* 팝오버 (T / FR 시간 설정) */
+let popKind=null;
+function openPop(kind,e){
+  popKind=kind;const p=$('pop'),r=$('popR');
+  if(kind==='T'){$('popT').textContent='타이머 T 설정 시간';r.min=1;r.max=30;r.step=.5;r.value=S.Tset}
+  else{$('popT').textContent='플리커 릴레이 FR 점멸 주기';r.min=.4;r.max=3;r.step=.1;r.value=S.frPer}
+  $('popO').textContent=(+r.value).toFixed(1)+'s';
+  p.hidden=false;p.style.left=Math.min(innerWidth-290,e.clientX+12)+'px';p.style.top=Math.min(innerHeight-130,e.clientY+12)+'px';
+}
+$('popR').oninput=e=>{const v=+e.target.value;$('popO').textContent=v.toFixed(1)+'s';if(popKind==='T')S.Tset=v;else S.frPer=v;syncPanel()};
+$('popClose').onclick=()=>$('pop').hidden=true;
+document.addEventListener('pointerdown',e=>{const p=$('pop');if(!p.hidden&&!p.contains(e.target)&&!e.target.classList.contains('hit'))p.hidden=true});
+
+syncPanel();
+requestAnimationFrame(step);
+</script>
+</body>
+</html>

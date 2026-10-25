@@ -468,7 +468,9 @@ ul, ol { list-style: none; }
   font-size: 38px; font-weight: 800; letter-spacing: -.04em;
   box-shadow: 0 16px 36px -14px color-mix(in srgb, var(--accent) 85%, transparent);
   margin-bottom: 22px;
+  overflow: hidden;
 }
+.profile__avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .profile__body h3 { font-size: 24px; font-weight: 780; letter-spacing: -.035em; }
 .profile__role { color: var(--text-3); font-size: 13.5px; margin-top: 4px; }
 .profile__link {
@@ -876,4 +878,68 @@ ul, ol { list-style: none; }
 @media print {
   .nav, .to-top, .hero__bg, .marquee, .hero__scroll { display: none !important; }
   body { background: #fff; color: #000; }
+}
+
+/* ---------- YouTube intro banner ---------- */
+.yt__intro {
+  display: flex; align-items: center; gap: 18px;
+  margin-bottom: 24px; padding: 18px 22px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background:
+    radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 60%),
+    var(--bg-2);
+  transition: transform .32s var(--ease), border-color .28s, box-shadow .32s;
+}
+.yt__intro:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+  box-shadow: var(--shadow);
+}
+.yt__intro-play {
+  flex: none; width: 54px; height: 54px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: #ff0000; color: #fff;
+  box-shadow: 0 8px 22px -8px rgba(255, 0, 0, .7);
+}
+.yt__intro-meta { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.yt__intro-meta b { font-size: 16px; font-weight: 720; letter-spacing: -.02em; }
+.yt__intro-meta i { font-style: normal; font-size: 13px; color: var(--text-3); }
+.yt__intro-arrow { flex: none; margin-left: auto; color: var(--text-3); transition: color .28s, transform .3s var(--ease); }
+.yt__intro:hover .yt__intro-arrow { color: var(--accent); transform: translate(2px, -2px); }
+
+/* ---------- Lab CTA (실습실) ---------- */
+.lab-cta {
+  position: relative; overflow: hidden;
+  margin-bottom: 26px; padding: 32px clamp(22px, 4vw, 40px);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-xl);
+  background:
+    linear-gradient(160deg, var(--surface-2), transparent 55%),
+    var(--bg-2);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+.lab-cta__spark {
+  position: absolute; right: -70px; top: -70px;
+  width: 240px; height: 240px; border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 26%, transparent), transparent 68%);
+  filter: blur(26px); pointer-events: none;
+}
+.lab-cta__title { font-size: clamp(22px, 3.4vw, 28px); font-weight: 760; letter-spacing: -.035em; }
+.lab-cta__desc {
+  position: relative; max-width: 620px; margin: 12px auto 0;
+  color: var(--text-2); font-size: 15px; line-height: 1.7;
+}
+.lab-cta__actions {
+  position: relative; display: flex; flex-wrap: wrap; justify-content: center;
+  gap: 12px; margin-top: 24px;
+}
+.lab-cta__note {
+  position: relative; margin-top: 20px;
+  color: var(--text-3); font-size: 13px; line-height: 1.6;
+}
+
+@media (max-width: 560px) {
+  .lab-cta__actions .btn { flex: 1 1 100%; }
 }
