@@ -5,11 +5,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 프로젝트 개요
 
 폴리텍전준옥(전기·제어 교육) 개인 홈페이지. **빌드 도구·의존성·프레임워크가 전혀 없는
-정적 3파일 사이트**입니다. 두 외부 리소스로 연결되는 랜딩 페이지입니다 — 유튜브 채널
+정적 사이트**입니다. 두 외부 리소스로 연결되는 랜딩 페이지입니다 — 유튜브 채널
 `@ok7724`(폴리텍전준옥 · 전기기능사 전문채널)와 전기기능사 실습실 `https://www.kopo.kr`
 (로그인 없는 회로 시뮬레이터). 콘텐츠·링크는 전부 이 두 곳에서 나옵니다.
 
-배포 대상은 `index.html` · `styles.css` · `script.js` 세 개뿐입니다. `.claude/`는
+배포 대상은 `index.html` · `styles.css` · `script.js` + 에셋 `icon.png`(파비콘·프로필 사진) ·
+`simulator-sample.html`(단독 실행 시뮬레이터, 의존성 없음)입니다. `.claude/`는
 `.gitignore`에 있고, `README.md` · `test_site.py`는 배포에 포함되지 않습니다.
 모든 경로가 상대경로라 서브디렉터리 배포(`example.com/site/`)도 그대로 동작합니다.
 
